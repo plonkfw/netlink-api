@@ -13,7 +13,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	// Fetch a list of all interfaces
 	links, err := netlink.LinkList()
 	if err != nil {
-		utils.Log.Error().Err(err).Msg("Error listing liks")
+		utils.Log.Error().Err(err).Msg("Error listing links")
 	}
 
 	msg := fmt.Sprintf("Found interfaces")
