@@ -11,13 +11,6 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-type addAddressResponse struct {
-	Status  string         `json:"status"`
-	Code    string         `json:"code"`
-	Message string         `json:"message"`
-	Data    []netlink.Addr `json:"data"`
-}
-
 // AddrAdd for api/v1/addr/Add.go
 type addrAdd struct {
 	Link    string
