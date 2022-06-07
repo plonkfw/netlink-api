@@ -1,9 +1,22 @@
 package routing
 
 import (
+	"net/http"
+
 	"github.com/plonkfw/netlink-api/api/v1/addr"
 	"github.com/plonkfw/netlink-api/api/v1/link"
 )
+
+// Route datatype
+type APIRoute struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
+}
+
+// Routes - collection of all routes
+type APIRoutes []APIRoute
 
 var routes = APIRoutes{
 	APIRoute{
