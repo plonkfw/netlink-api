@@ -1,7 +1,7 @@
 package link
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/plonkfw/netlink-api/utils"
@@ -16,14 +16,6 @@ func List(w http.ResponseWriter, r *http.Request) {
 		utils.Log.Error().Err(err).Msg("Error listing liks")
 	}
 
-	// Prepare the response
-	response, err := json.MarshalIndent(links, "", "  ")
-	if err != nil {
-		utils.Log.Error().Err(err).Msg("Error marshling response")
-	}
-
-	// Send the response
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(response))
+	msg := fmt.Sprintf("Found interfaces")
+	utils.ReplySuccess(w, r, msg, links)
 }

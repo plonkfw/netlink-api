@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/types"
 	"github.com/plonkfw/netlink-api/utils"
 	"github.com/vishvananda/netlink"
 )
@@ -19,10 +18,16 @@ type addAddressResponse struct {
 	Data    []netlink.Addr `json:"data"`
 }
 
+// AddrAdd for api/v1/addr/Add.go
+type addrAdd struct {
+	Link    string
+	Address string
+}
+
 // Add adds an address to a link device
 func Add(w http.ResponseWriter, r *http.Request) {
 	// Prep our new address
-	var addr types.AddrAdd
+	var addr addrAdd
 
 	// Read in the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -58,7 +63,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse the given address
-	newAddress, err := netlink.ParseAddr(addr.Address)
+	parsedAddress, err := netlink.ParseAddr(addr.Address)
 	if err != nil {
 		msg := fmt.Sprintf("Error parsing address %s", addr.Address)
 		utils.Log.Error().Err(err).Msg(msg)
@@ -69,7 +74,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Reset err to nil...
 	err = nil
 	// Attempt to create the link device
-	err = netlink.AddrAdd(link, newAddress)
+	err = netlink.AddrAdd(link, parsedAddress)
 
 	// If it fails send our error response
 	if err != nil {
@@ -79,22 +84,9 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	address, _ := netlink.AddrList(link, 0)
+	addressList, _ := netlink.AddrList(link, 0)
 
 	// Prep response
 	msg := fmt.Sprintf("Successfully added address %s to link %s", addr.Address, addr.Link)
-	response := addAddressResponse{
-		Status:  "success",
-		Code:    "SUCCESS",
-		Message: msg,
-		Data:    address,
-	}
-
-	// JSON-ify the response
-	jsonResponse, _ := json.MarshalIndent(response, "", "  ")
-
-	// Send the response
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonResponse))
+	utils.ReplySuccess(w, r, msg, addressList)
 }

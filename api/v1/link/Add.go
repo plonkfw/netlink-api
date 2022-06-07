@@ -8,29 +8,21 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/types"
 	"github.com/plonkfw/netlink-api/utils"
 	"github.com/vishvananda/netlink"
 )
 
-type addBridgeResponse struct {
-	Status  string          `json:"status"`
-	Code    string          `json:"code"`
-	Message string          `json:"message"`
-	Data    *netlink.Bridge `json:"data"`
-}
-
-type addDummyResponse struct {
-	Status  string         `json:"status"`
-	Code    string         `json:"code"`
-	Message string         `json:"message"`
-	Data    *netlink.Dummy `json:"data"`
+// linkAdd for api/v1/link/Add.go
+type linkAdd struct {
+	Name string
+	Type string
+	MTU  int
 }
 
 // Add creates a new network link - equivalent to `ip link add $i`
 func Add(w http.ResponseWriter, r *http.Request) {
 	// Prep our new link
-	var link types.LinkAdd
+	var link linkAdd
 
 	// Unpack the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -70,7 +62,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 }
 
 // addBridge creates a basic linux bridge
-func addBridge(w http.ResponseWriter, r *http.Request, link types.LinkAdd) {
+func addBridge(w http.ResponseWriter, r *http.Request, link linkAdd) {
 	// Setup link attributes
 	linkAttrs := netlink.NewLinkAttrs()
 	linkAttrs.Name = link.Name
@@ -89,25 +81,12 @@ func addBridge(w http.ResponseWriter, r *http.Request, link types.LinkAdd) {
 		return
 	}
 
-	// Prep response
-	response := addBridgeResponse{
-		Status:  "success",
-		Code:    "SUCCESS",
-		Message: fmt.Sprintf("Successfully added bridge %s", bridge.Name),
-		Data:    bridge,
-	}
-
-	// JSON-ify the response
-	jsonResponse, _ := json.MarshalIndent(response, "", "  ")
-
-	// Send the response
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonResponse))
+	msg := fmt.Sprintf("Successfully added bridge %s", bridge.Name)
+	utils.ReplySuccess(w, r, msg, bridge)
 }
 
 // addDummy creates a dummy device
-func addDummy(w http.ResponseWriter, r *http.Request, link types.LinkAdd) {
+func addDummy(w http.ResponseWriter, r *http.Request, link linkAdd) {
 	// Setup link attributes
 	linkAttrs := netlink.NewLinkAttrs()
 	linkAttrs.Name = link.Name
@@ -126,19 +105,6 @@ func addDummy(w http.ResponseWriter, r *http.Request, link types.LinkAdd) {
 		return
 	}
 
-	// Prep response
-	response := addDummyResponse{
-		Status:  "success",
-		Code:    "SUCCESS",
-		Message: fmt.Sprintf("Successfully added dummy %s", dummy.Name),
-		Data:    dummy,
-	}
-
-	// JSON-ify the response
-	jsonResponse, _ := json.MarshalIndent(response, "", "  ")
-
-	// Send the response
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(jsonResponse))
+	msg := fmt.Sprintf("Successfully added dummy %s", dummy.Name)
+	utils.ReplySuccess(w, r, msg, dummy)
 }
