@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/utils"
+	utilsv1 "github.com/plonkfw/netlink-api/utils/v1"
 	"github.com/vishvananda/netlink"
 )
 
@@ -27,21 +27,21 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Unpack the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		utils.Log.Error().Err(err).Msg("Error reading body")
-		utils.ReplyError(w, r, "Error reading body", err)
+		utilsv1.Log.Error().Err(err).Msg("Error reading body")
+		utilsv1.ReplyError(w, r, "Error reading body", err)
 		return
 	}
 
 	// Print the request to deubg stream
-	utils.Log.Debug().Msg(string(body))
+	utilsv1.Log.Debug().Msg(string(body))
 
 	// Unpack the request
 	if err := json.Unmarshal(body, &link); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
-			utils.Log.Error().Err(err).Msg("Error unmarshaling body")
-			utils.ReplyError(w, r, "Error unmarshaling body", err)
+			utilsv1.Log.Error().Err(err).Msg("Error unmarshaling body")
+			utilsv1.ReplyError(w, r, "Error unmarshaling body", err)
 			return
 		}
 	}
@@ -57,7 +57,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Bail out
 	default:
 		err := errors.New("not implemented")
-		utils.ReplyError(w, r, "not implemented", err)
+		utilsv1.ReplyError(w, r, "not implemented", err)
 	}
 }
 
@@ -76,13 +76,13 @@ func addBridge(w http.ResponseWriter, r *http.Request, link linkAdd) {
 	err := netlink.LinkAdd(bridge)
 	if err != nil {
 		msg := fmt.Sprintf("Could not add bridge %s", bridge.Name)
-		utils.Log.Error().Err(err).Msg(msg)
-		utils.ReplyError(w, r, msg, err)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, err)
 		return
 	}
 
 	msg := fmt.Sprintf("Successfully added bridge %s", bridge.Name)
-	utils.ReplySuccess(w, r, msg, bridge)
+	utilsv1.ReplySuccess(w, r, msg, bridge)
 }
 
 // addDummy creates a dummy device
@@ -100,11 +100,11 @@ func addDummy(w http.ResponseWriter, r *http.Request, link linkAdd) {
 	err := netlink.LinkAdd(dummy)
 	if err != nil {
 		msg := fmt.Sprintf("Could not add dummy %s", dummy.Name)
-		utils.Log.Error().Err(err).Msg(msg)
-		utils.ReplyError(w, r, msg, err)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, err)
 		return
 	}
 
 	msg := fmt.Sprintf("Successfully added dummy %s", dummy.Name)
-	utils.ReplySuccess(w, r, msg, dummy)
+	utilsv1.ReplySuccess(w, r, msg, dummy)
 }

@@ -1,16 +1,16 @@
-package utils
+package utilsv1
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/types"
+	typesv1 "github.com/plonkfw/netlink-api/types/v1"
 )
 
 // ReplySuccess sends a formatted success reponse
 func ReplySuccess(w http.ResponseWriter, r *http.Request, msg string, data interface{}) {
 	// Prep response
-	response := types.APIResponse{
+	response := typesv1.APIResponse{
 		Status:  "success",
 		Code:    "SUCCESS",
 		Message: msg,

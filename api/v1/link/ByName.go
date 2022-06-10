@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/utils"
+	utilsv1 "github.com/plonkfw/netlink-api/utils/v1"
 	"github.com/vishvananda/netlink"
 )
 
@@ -17,12 +17,12 @@ func ByName(w http.ResponseWriter, r *http.Request) {
 	link, err := netlink.LinkByName(name)
 	if err != nil {
 		msg := fmt.Sprintf("Error querying link %s", name)
-		utils.Log.Error().Err(err).Msg(msg)
-		utils.ReplyError(w, r, msg, err)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, err)
 		return
 	}
 
 	// Prep response
 	msg := fmt.Sprintf("Found interface %s", name)
-	utils.ReplySuccess(w, r, msg, link)
+	utilsv1.ReplySuccess(w, r, msg, link)
 }

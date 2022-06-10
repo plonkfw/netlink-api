@@ -1,10 +1,10 @@
-package utils
+package utilsv1
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/types"
+	typesv1 "github.com/plonkfw/netlink-api/types/v1"
 )
 
 // ReplyError returns a formatted error response
@@ -42,7 +42,7 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, err error) {
 	}
 
 	// Prep the response
-	response := types.APIResponse{
+	response := typesv1.APIResponse{
 		Status:  status,
 		Code:    code,
 		Message: message,

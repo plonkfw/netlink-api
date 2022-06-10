@@ -1,4 +1,4 @@
-package types
+package typesv1
 
 // APIResponse standardization
 type APIResponse struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/utils"
+	utilsv1 "github.com/plonkfw/netlink-api/utils/v1"
 	"github.com/vishvananda/netlink"
 )
 
@@ -13,9 +13,9 @@ func List(w http.ResponseWriter, r *http.Request) {
 	// Fetch a list of all interfaces
 	links, err := netlink.LinkList()
 	if err != nil {
-		utils.Log.Error().Err(err).Msg("Error listing links")
+		utilsv1.Log.Error().Err(err).Msg("Error listing links")
 	}
 
 	msg := fmt.Sprintf("Found interfaces")
-	utils.ReplySuccess(w, r, msg, links)
+	utilsv1.ReplySuccess(w, r, msg, links)
 }

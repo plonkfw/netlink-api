@@ -1,4 +1,4 @@
-package routing
+package routingv1
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/plonkfw/netlink-api/utils"
+	utilsv1 "github.com/plonkfw/netlink-api/utils/v1"
 )
 
 // NewAPIRouter creates our router
@@ -33,7 +33,7 @@ func httpLogger(inner http.Handler, name string) http.Handler {
 
 		inner.ServeHTTP(w, r)
 
-		utils.Log.Debug().Msg(fmt.Sprintf(
+		utilsv1.Log.Debug().Msg(fmt.Sprintf(
 			"%s\t%s\t%s\t%s",
 			r.Method,
 			r.RequestURI,
