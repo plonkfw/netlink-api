@@ -7,7 +7,7 @@ import (
 	"github.com/plonkfw/netlink-api/api/v1/link"
 )
 
-// Route datatype
+// APIRoute - Route datatype
 type APIRoute struct {
 	Name        string
 	Method      string
@@ -15,7 +15,7 @@ type APIRoute struct {
 	HandlerFunc http.HandlerFunc
 }
 
-// Routes - collection of all routes
+// APIRoutes - Routes - collection of all routes
 type APIRoutes []APIRoute
 
 var routes = APIRoutes{
@@ -48,5 +48,11 @@ var routes = APIRoutes{
 		Method:      "GET",
 		Pattern:     "/v1/link/list",
 		HandlerFunc: link.List,
+	},
+	APIRoute{
+		Name:        "api/v1/link/SetMaster.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/master",
+		HandlerFunc: link.SetMaster,
 	},
 }
