@@ -1,4 +1,4 @@
-package addr
+package addrv1
 
 import (
 	"fmt"

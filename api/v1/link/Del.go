@@ -1,4 +1,4 @@
-package link
+package linkv1
 
 import (
 	"encoding/json"

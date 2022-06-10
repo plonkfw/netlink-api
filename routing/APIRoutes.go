@@ -3,8 +3,8 @@ package routing
 import (
 	"net/http"
 
-	"github.com/plonkfw/netlink-api/api/v1/addr"
-	"github.com/plonkfw/netlink-api/api/v1/link"
+	addrv1 "github.com/plonkfw/netlink-api/api/v1/addr"
+	linkv1 "github.com/plonkfw/netlink-api/api/v1/link"
 )
 
 // APIRoute - Route datatype
@@ -23,66 +23,66 @@ var routes = APIRoutes{
 		Name:        "api/v1/addr/Add.go",
 		Method:      "POST",
 		Pattern:     "/v1/addr/add",
-		HandlerFunc: addr.Add,
+		HandlerFunc: addrv1.Add,
 	},
 	APIRoute{
 		Name:        "api/v1/addr/List.go",
 		Method:      "GET",
 		Pattern:     "/v1/addr/list",
-		HandlerFunc: addr.List,
+		HandlerFunc: addrv1.List,
 	},
 	APIRoute{
 		Name:        "api/v1/link/Add.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/add",
-		HandlerFunc: link.Add,
+		HandlerFunc: linkv1.Add,
 	},
 	APIRoute{
 		Name:        "api/v1/link/ByName.go",
 		Method:      "GET",
 		Pattern:     "/v1/link/by/name",
-		HandlerFunc: link.ByName,
+		HandlerFunc: linkv1.ByName,
 	},
 	APIRoute{
 		Name:        "api/v1/link/ByIndex.go",
 		Method:      "GET",
 		Pattern:     "/v1/link/by/index",
-		HandlerFunc: link.ByIndex,
+		HandlerFunc: linkv1.ByIndex,
 	},
 	APIRoute{
 		Name:        "api/v1/link/Del.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/del",
-		HandlerFunc: link.Del,
+		HandlerFunc: linkv1.Del,
 	},
 	APIRoute{
 		Name:        "api/v1/link/List.go",
 		Method:      "GET",
 		Pattern:     "/v1/link/list",
-		HandlerFunc: link.List,
+		HandlerFunc: linkv1.List,
 	},
 	APIRoute{
 		Name:        "api/v1/link/SetDown.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/set/down",
-		HandlerFunc: link.SetDown,
+		HandlerFunc: linkv1.SetDown,
 	},
 	APIRoute{
 		Name:        "api/v1/link/SetUp.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/set/up",
-		HandlerFunc: link.SetUp,
+		HandlerFunc: linkv1.SetUp,
 	},
 	APIRoute{
 		Name:        "api/v1/link/SetMaster.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/set/master",
-		HandlerFunc: link.SetMaster,
+		HandlerFunc: linkv1.SetMaster,
 	},
 	APIRoute{
 		Name:        "api/v1/link/SetNoMaster.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/set/nomaster",
-		HandlerFunc: link.SetNoMaster,
+		HandlerFunc: linkv1.SetNoMaster,
 	},
 }

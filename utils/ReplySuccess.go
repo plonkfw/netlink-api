@@ -10,7 +10,6 @@ import (
 // ReplySuccess sends a formatted success reponse
 func ReplySuccess(w http.ResponseWriter, r *http.Request, msg string, data interface{}) {
 	// Prep response
-	// dataString := string(data)
 	response := types.APIResponse{
 		Status:  "success",
 		Code:    "SUCCESS",

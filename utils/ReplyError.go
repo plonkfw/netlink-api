@@ -42,7 +42,6 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, err error) {
 	}
 
 	// Prep the response
-	// dataString := string(data)
 	response := types.APIResponse{
 		Status:  status,
 		Code:    code,
