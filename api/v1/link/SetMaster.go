@@ -12,7 +12,7 @@ import (
 )
 
 type setMaster struct {
-	Link   string
+	Name   string
 	Master string
 }
 
@@ -49,7 +49,7 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If they supplied an interface name
-	if setMaster.Master != "" && setMaster.Link != "" {
+	if setMaster.Master != "" && setMaster.Name != "" {
 		// Look up the master link
 		newMaster, err := netlink.LinkByName(setMaster.Master)
 		if err != nil {
@@ -60,9 +60,9 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Look up the child link
-		newLink, err := netlink.LinkByName(setMaster.Link)
+		newLink, err := netlink.LinkByName(setMaster.Name)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setMaster.Link)
+			msg := fmt.Sprintf("Error looking up link %s", setMaster.Name)
 			utils.Log.Error().Err(err).Msg(msg)
 			utils.ReplyError(w, r, msg, err)
 			return
@@ -72,14 +72,14 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkSetMaster(newLink, newMaster)
 		if err != nil {
-			msg := fmt.Sprintf("Error binding link %s to master %s", setMaster.Link, setMaster.Master)
+			msg := fmt.Sprintf("Error binding link %s to master %s", setMaster.Name, setMaster.Master)
 			utils.Log.Error().Err(err).Msg(msg)
 			utils.ReplyError(w, r, msg, err)
 			return
 		}
 
 		// Lookup the link by name
-		refreshedLink, _ := netlink.LinkByName(setMaster.Link)
+		refreshedLink, _ := netlink.LinkByName(setMaster.Name)
 		refreshedMaster, _ := netlink.LinkByName(setMaster.Master)
 
 		var responseData responseData
@@ -88,12 +88,12 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		responseData.Master = refreshedMaster
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully bound %s to master %s", setMaster.Link, setMaster.Master)
+		msg := fmt.Sprintf("Successfully bound %s to master %s", setMaster.Name, setMaster.Master)
 		utils.ReplySuccess(w, r, msg, responseData)
 		return
 	}
 
-	msg := fmt.Sprintf("Invalid paramaters %s %s", setMaster.Link, setMaster.Master)
+	msg := fmt.Sprintf("Invalid paramaters %s %s", setMaster.Name, setMaster.Master)
 	utils.Log.Error().Err(err).Msg(msg)
 	utils.ReplyError(w, r, msg, err)
 	return

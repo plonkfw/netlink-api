@@ -50,10 +50,28 @@ var routes = APIRoutes{
 		HandlerFunc: link.ByIndex,
 	},
 	APIRoute{
+		Name:        "api/v1/link/Del.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/del",
+		HandlerFunc: link.Del,
+	},
+	APIRoute{
 		Name:        "api/v1/link/List.go",
 		Method:      "GET",
 		Pattern:     "/v1/link/list",
 		HandlerFunc: link.List,
+	},
+	APIRoute{
+		Name:        "api/v1/link/SetDown.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/down",
+		HandlerFunc: link.SetDown,
+	},
+	APIRoute{
+		Name:        "api/v1/link/SetUp.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/up",
+		HandlerFunc: link.SetUp,
 	},
 	APIRoute{
 		Name:        "api/v1/link/SetMaster.go",

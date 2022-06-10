@@ -11,13 +11,13 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-type setNoMaster struct {
+type setDown struct {
 	Name string
 }
 
-// SetNoMaster removes the master of the link device
-func SetNoMaster(w http.ResponseWriter, r *http.Request) {
-	var setNoMaster setNoMaster
+// SetDown disables link devices
+func SetDown(w http.ResponseWriter, r *http.Request) {
+	var setDown setDown
 
 	// Unpack the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -31,7 +31,7 @@ func SetNoMaster(w http.ResponseWriter, r *http.Request) {
 	utils.Log.Debug().Msg(string(body))
 
 	// Unpack the request
-	if err := json.Unmarshal(body, &setNoMaster); err != nil {
+	if err := json.Unmarshal(body, &setDown); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
@@ -41,29 +41,29 @@ func SetNoMaster(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if setNoMaster.Name != "" {
-		link, _ := netlink.LinkByName(setNoMaster.Name)
+	if setDown.Name != "" {
+		link, _ := netlink.LinkByName(setDown.Name)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setNoMaster.Name)
+			msg := fmt.Sprintf("Error looking up link %s", setDown.Name)
 			utils.Log.Error().Err(err).Msg(msg)
 			utils.ReplyError(w, r, msg, err)
 			return
 		}
 
 		err = nil
-		err = netlink.LinkSetNoMaster(link)
+		err = netlink.LinkSetDown(link)
 		if err != nil {
-			msg := fmt.Sprintf("Error removing master of link %s", setNoMaster.Name)
+			msg := fmt.Sprintf("Error downing link %s", setDown.Name)
 			utils.Log.Error().Err(err).Msg(msg)
 			utils.ReplyError(w, r, msg, err)
 			return
 		}
 
 		// Lookup the link by name
-		refreshedLink, _ := netlink.LinkByName(setNoMaster.Name)
+		refreshedLink, _ := netlink.LinkByName(setDown.Name)
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully removed the master of %s", setNoMaster.Name)
+		msg := fmt.Sprintf("Successfully downed interface %s", setDown.Name)
 		utils.ReplySuccess(w, r, msg, refreshedLink)
 		return
 	}
