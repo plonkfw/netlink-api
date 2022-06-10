@@ -21,6 +21,7 @@ func ByName(w http.ResponseWriter, r *http.Request) {
 		utils.ReplyError(w, r, msg, err)
 		return
 	}
+
 	// Prep response
 	msg := fmt.Sprintf("Found interface %s", name)
 	utils.ReplySuccess(w, r, msg, link)
