@@ -42,7 +42,7 @@ func Del(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if linkDel.Name != "" {
-		link, _ := netlink.LinkByName(linkDel.Name)
+		link, err := netlink.LinkByName(linkDel.Name)
 		if err != nil {
 			msg := fmt.Sprintf("Error looking up link %s", linkDel.Name)
 			utilsv1.Log.Error().Err(err).Msg(msg)
