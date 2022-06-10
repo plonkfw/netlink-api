@@ -19,7 +19,7 @@ func ReplySuccess(w http.ResponseWriter, r *http.Request, msg string, data inter
 	}
 
 	// JSON-ify the response
-	jsonResponse, _ := json.MarshalIndent(response, "", "  ")
+	jsonResponse, _ := json.Marshal(response)
 
 	// Send the response
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

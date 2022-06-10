@@ -16,23 +16,24 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, err error) {
 	if msg != "" {
 		message = msg
 	}
+	errHeader := http.StatusBadRequest
 
 	// Select proper error code based on message
 	switch err.Error() {
 	case "file exists":
 		code = "EEXISTS"
 		// We set the http status header up here
-		w.WriteHeader(http.StatusConflict)
+		errHeader = http.StatusConflict
 		break
 
 	case "operation not permitted":
 		code = "ENOTPERMITTED"
-		w.WriteHeader(http.StatusInternalServerError)
+		errHeader = http.StatusInternalServerError
 		break
 
 	case "not implemented":
 		code = "ENOTIMPLEMENTED"
-		w.WriteHeader(http.StatusNotImplemented)
+		errHeader = http.StatusNotImplemented
 		break
 
 	default:
@@ -46,10 +47,12 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, err error) {
 		Status:  status,
 		Code:    code,
 		Message: message,
+		Data:    err.Error(),
 	}
-	jsonResponse, _ := json.MarshalIndent(response, "", "  ")
+	jsonResponse, _ := json.Marshal(response)
 
 	// send the response
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(errHeader)
 	w.Write([]byte(jsonResponse))
 }
