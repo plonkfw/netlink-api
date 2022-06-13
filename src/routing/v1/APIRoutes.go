@@ -86,6 +86,12 @@ var routes = APIRoutes{
 		HandlerFunc: linkv1.SetMasterByIndex,
 	},
 	APIRoute{
+		Name:        "api/v1/link/SetName.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/name",
+		HandlerFunc: linkv1.SetName,
+	},
+	APIRoute{
 		Name:        "api/v1/link/SetNoMaster.go",
 		Method:      "POST",
 		Pattern:     "/v1/link/set/nomaster",
