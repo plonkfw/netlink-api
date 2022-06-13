@@ -26,7 +26,7 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 	// Prep our object
 	var setMaster setMaster
 
-	// Unpack the request
+	// Read the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		utilsv1.Log.Error().Err(err).Msg("Error reading body")
