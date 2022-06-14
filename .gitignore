@@ -21,3 +21,5 @@ build/*
 # vscode dirs
 .vscode/*
 
+pkg/*
+bin/*
