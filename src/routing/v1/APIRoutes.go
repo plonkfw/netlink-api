@@ -67,12 +67,7 @@ var routes = APIRoutes{
 		Pattern:     "/v1/link/set/down",
 		HandlerFunc: linkv1.SetDown,
 	},
-	APIRoute{
-		Name:        "api/v1/link/SetUp.go",
-		Method:      "POST",
-		Pattern:     "/v1/link/set/up",
-		HandlerFunc: linkv1.SetUp,
-	},
+
 	APIRoute{
 		Name:        "api/v1/link/SetMaster.go",
 		Method:      "POST",
@@ -96,5 +91,23 @@ var routes = APIRoutes{
 		Method:      "POST",
 		Pattern:     "/v1/link/set/nomaster",
 		HandlerFunc: linkv1.SetNoMaster,
+	},
+	APIRoute{
+		Name:        "api/v1/link/SetPromiscOff.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/promisc/off",
+		HandlerFunc: linkv1.SetPromiscOff,
+	},
+	APIRoute{
+		Name:        "api/v1/link/SetPromiscOn.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/promisc/on",
+		HandlerFunc: linkv1.SetPromiscOn,
+	},
+	APIRoute{
+		Name:        "api/v1/link/SetUp.go",
+		Method:      "POST",
+		Pattern:     "/v1/link/set/up",
+		HandlerFunc: linkv1.SetUp,
 	},
 }
