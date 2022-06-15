@@ -25,9 +25,9 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Read in the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		msg := fmt.Sprintf("Error reading body")
+		msg := "Error reading body"
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "EREADFAIL", err)
 		return
 	}
 
@@ -39,9 +39,9 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
-			msg := fmt.Sprintf("Error unmarshaling body")
+			msg := "Error unmarshaling body"
 			utilsv1.Log.Error().Err(err).Msg(msg)
-			utilsv1.ReplyError(w, r, msg, err)
+			utilsv1.ReplyError(w, r, msg, "EUNPACKFAIL", err)
 			return
 		}
 	}
@@ -51,7 +51,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := fmt.Sprintf("Error looking up link %s", addr.Link)
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 		return
 	}
 
@@ -60,7 +60,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := fmt.Sprintf("Error parsing address %s", addr.Address)
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
 		return
 	}
 
@@ -73,7 +73,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := fmt.Sprintf("Error adding address %s to link %s", addr.Address, addr.Link)
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 		return
 	}
 

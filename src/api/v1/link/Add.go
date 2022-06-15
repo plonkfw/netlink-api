@@ -27,8 +27,9 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Unpack the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		utilsv1.Log.Error().Err(err).Msg("Error reading body")
-		utilsv1.ReplyError(w, r, "Error reading body", err)
+		msg := "Error reading body"
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "EREADFAIL", err)
 		return
 	}
 
@@ -40,8 +41,9 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
-			utilsv1.Log.Error().Err(err).Msg("Error unmarshaling body")
-			utilsv1.ReplyError(w, r, "Error unmarshaling body", err)
+			msg := "Error unmarshaling body"
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "EUNPACKFAIL", err)
 			return
 		}
 	}
@@ -56,8 +58,8 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		addDummy(w, r, link)
 	// Bail out
 	default:
-		err := errors.New("not implemented")
-		utilsv1.ReplyError(w, r, "not implemented", err)
+		err := errors.New("Link type not implemented")
+		utilsv1.ReplyError(w, r, "ENOTIMPLEMENTED", "Link type not implemented", err)
 	}
 }
 
@@ -77,7 +79,7 @@ func addBridge(w http.ResponseWriter, r *http.Request, link linkAdd) {
 	if err != nil {
 		msg := fmt.Sprintf("Could not add bridge %s", bridge.Name)
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 		return
 	}
 
@@ -101,7 +103,7 @@ func addDummy(w http.ResponseWriter, r *http.Request, link linkAdd) {
 	if err != nil {
 		msg := fmt.Sprintf("Could not add dummy %s", dummy.Name)
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 		return
 	}
 

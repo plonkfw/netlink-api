@@ -8,31 +8,35 @@ import (
 )
 
 // ReplyError returns a formatted error response
-func ReplyError(w http.ResponseWriter, r *http.Request, msg string, err error) {
+func ReplyError(w http.ResponseWriter, r *http.Request, msg string, code string, err error) {
 	// Setup some defaults
 	status := "failed"
-	code := "EEUNKNOWN"
-	message := err.Error()
-	if msg != "" {
+	message := ""
+
+	if msg == "" {
+		message = err.Error()
+	} else {
 		message = msg
 	}
+
+	if code == "" {
+		code = "EEUNKNOWN"
+	}
+
 	errHeader := http.StatusBadRequest
 
 	// Select proper error code based on message
-	switch err.Error() {
-	case "file exists":
-		code = "EEXISTS"
+	switch code {
+	case "EEXISTS":
 		// We set the http status header up here
 		errHeader = http.StatusConflict
 		break
 
-	case "operation not permitted":
-		code = "ENOTPERMITTED"
+	case "ENOTPERMITTED":
 		errHeader = http.StatusInternalServerError
 		break
 
-	case "not implemented":
-		code = "ENOTIMPLEMENTED"
+	case "ENOTIMPLEMENTED":
 		errHeader = http.StatusNotImplemented
 		break
 

@@ -26,11 +26,12 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 	// Prep our object
 	var setMaster setMaster
 
-	// Read the request
+	// Read in the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		utilsv1.Log.Error().Err(err).Msg("Error reading body")
-		utilsv1.ReplyError(w, r, "Error reading body", err)
+		msg := "Error reading body"
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "EREADFAIL", err)
 		return
 	}
 
@@ -42,8 +43,9 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
-			utilsv1.Log.Error().Err(err).Msg("Error unmarshaling body")
-			utilsv1.ReplyError(w, r, "Error unmarshaling body", err)
+			msg := "Error unmarshaling body"
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "EUNPACKFAIL", err)
 			return
 		}
 	}
@@ -55,7 +57,7 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg := fmt.Sprintf("Error looking up master %s", setMaster.Master)
 			utilsv1.Log.Error().Err(err).Msg(msg)
-			utilsv1.ReplyError(w, r, msg, err)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
 		}
 
@@ -64,7 +66,7 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg := fmt.Sprintf("Error looking up link %s", setMaster.Name)
 			utilsv1.Log.Error().Err(err).Msg(msg)
-			utilsv1.ReplyError(w, r, msg, err)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
 		}
 
@@ -74,7 +76,7 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg := fmt.Sprintf("Error binding link %s to master %s", setMaster.Name, setMaster.Master)
 			utilsv1.Log.Error().Err(err).Msg(msg)
-			utilsv1.ReplyError(w, r, msg, err)
+			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
@@ -95,6 +97,6 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 
 	msg := fmt.Sprintf("Invalid paramaters %s %s", setMaster.Name, setMaster.Master)
 	utilsv1.Log.Error().Err(err).Msg(msg)
-	utilsv1.ReplyError(w, r, msg, err)
+	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return
 }

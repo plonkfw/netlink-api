@@ -1,7 +1,6 @@
 package addrv1
 
 import (
-	"fmt"
 	"net/http"
 
 	utilsv1 "github.com/plonkfw/netlink-api/utils/v1"
@@ -13,9 +12,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 	// Fetch a list of all addresses
 	addresses, err := netlink.AddrList(nil, 0)
 	if err != nil {
-		utilsv1.Log.Error().Err(err).Msg("Error listing addresses")
+		msg := "Error listing addresses"
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "ELISTFAIL", err)
 	}
 
-	msg := fmt.Sprintf("Found addresses")
+	msg := "Found addresses"
 	utilsv1.ReplySuccess(w, r, msg, addresses)
 }

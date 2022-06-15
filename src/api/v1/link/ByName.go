@@ -18,7 +18,7 @@ func ByName(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := fmt.Sprintf("Error querying link %s", name)
 		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, err)
+		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 		return
 	}
 
