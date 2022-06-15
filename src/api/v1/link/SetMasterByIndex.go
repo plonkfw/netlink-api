@@ -12,7 +12,7 @@ import (
 )
 
 type setMasterByIndex struct {
-	Name   string
+	Name        string
 	MasterIndex int
 }
 
@@ -21,7 +21,7 @@ type responseDataSetMasterByIndex struct {
 	Master netlink.Link `json:"master"`
 }
 
-// SetMaster sets the parent bridge for an interface
+// SetMasterByIndex sets the parent bridge for an interface
 func SetMasterByIndex(w http.ResponseWriter, r *http.Request) {
 	// Prep our object
 	var setMasterByIndex setMasterByIndex
@@ -53,7 +53,7 @@ func SetMasterByIndex(w http.ResponseWriter, r *http.Request) {
 		// Look up the master link
 		newMaster, err := netlink.LinkByIndex(setMasterByIndex.MasterIndex)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up master %s", setMasterByIndex.MasterIndex)
+			msg := fmt.Sprintf("Error looking up master %d", setMasterByIndex.MasterIndex)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, err)
 			return
