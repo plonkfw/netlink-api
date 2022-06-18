@@ -26,6 +26,12 @@ var routes = APIRoutes{
 		HandlerFunc: addrv1.Add,
 	},
 	APIRoute{
+		Name:        "api/v1/addr/Del.go",
+		Method:      "POST",
+		Pattern:     "/v1/addr/del",
+		HandlerFunc: addrv1.Del,
+	},
+	APIRoute{
 		Name:        "api/v1/addr/List.go",
 		Method:      "GET",
 		Pattern:     "/v1/addr/list",

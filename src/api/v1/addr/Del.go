@@ -12,15 +12,15 @@ import (
 )
 
 // AddrAdd for api/v1/addr/Add.go
-type addrAdd struct {
+type addrDel struct {
 	Link    string
 	Address string
 }
 
-// Add adds an address to a link device
-func Add(w http.ResponseWriter, r *http.Request) {
+// Del removes an address from a link device
+func Del(w http.ResponseWriter, r *http.Request) {
 	// Prep our new address
-	var addrAdd addrAdd
+	var addrDel addrDel
 
 	// Read in the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -35,7 +35,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	utilsv1.Log.Debug().Msg(string(body))
 
 	// Unpack the request
-	if err := json.Unmarshal(body, &addrAdd); err != nil {
+	if err := json.Unmarshal(body, &addrDel); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
@@ -47,18 +47,18 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Lookup the link devices by name
-	link, err := netlink.LinkByName(addrAdd.Link)
+	link, err := netlink.LinkByName(addrDel.Link)
 	if err != nil {
-		msg := fmt.Sprintf("Error looking up link %s", addrAdd.Link)
+		msg := fmt.Sprintf("Error looking up link %s", addrDel.Link)
 		utilsv1.Log.Error().Err(err).Msg(msg)
 		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 		return
 	}
 
 	// Parse the given address
-	parsedAddress, err := netlink.ParseAddr(addrAdd.Address)
+	parsedAddress, err := netlink.ParseAddr(addrDel.Address)
 	if err != nil {
-		msg := fmt.Sprintf("Error parsing address %s", addrAdd.Address)
+		msg := fmt.Sprintf("Error parsing address %s", addrDel.Address)
 		utilsv1.Log.Error().Err(err).Msg(msg)
 		utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
 		return
@@ -67,11 +67,11 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Reset err to nil...
 	err = nil
 	// Attempt to create the link device
-	err = netlink.AddrAdd(link, parsedAddress)
+	err = netlink.AddrDel(link, parsedAddress)
 
 	// If it fails send our error response
 	if err != nil {
-		msg := fmt.Sprintf("Error adding address %s to link %s", addrAdd.Address, addrAdd.Link)
+		msg := fmt.Sprintf("Error removing address %s from link %s", addrDel.Address, addrDel.Link)
 		utilsv1.Log.Error().Err(err).Msg(msg)
 		utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 		return
@@ -80,13 +80,13 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	// Get address info
 	addressList, err := netlink.AddrList(link, 0)
 	if err != nil {
-		msg := fmt.Sprintf("Error refreshing info for link %s", addrAdd.Link)
+		msg := fmt.Sprintf("Error refreshing info for link %s", addrDel.Link)
 		utilsv1.Log.Error().Err(err).Msg(msg)
 		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 		return
 	}
 
 	// Prep response
-	msg := fmt.Sprintf("Successfully added address %s to link %s", addrAdd.Address, addrAdd.Link)
+	msg := fmt.Sprintf("Successfully removed address %s from link %s", addrDel.Address, addrDel.Link)
 	utilsv1.ReplySuccess(w, r, msg, addressList)
 }
