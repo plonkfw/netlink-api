@@ -14,7 +14,7 @@ import (
 
 // linkAdd for api/v1/link/Add.go
 type linkAdd struct {
-	Name string
+	Link string
 	Type string
 	MTU  int
 }
@@ -22,7 +22,7 @@ type linkAdd struct {
 // Add creates a new network link - equivalent to `ip link add $i`
 func Add(w http.ResponseWriter, r *http.Request) {
 	// Prep our new link
-	var link linkAdd
+	var linkAdd linkAdd
 
 	// Unpack the request
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -37,7 +37,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	utilsv1.Log.Debug().Msg(string(body))
 
 	// Unpack the request
-	if err := json.Unmarshal(body, &link); err != nil {
+	if err := json.Unmarshal(body, &linkAdd); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
@@ -49,13 +49,13 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the appropriate function
-	switch link.Type {
+	switch linkAdd.Type {
 	// Basic bridge
 	case "bridge":
-		addBridge(w, r, link)
+		addBridge(w, r, linkAdd)
 	// Dummy device
 	case "dummy":
-		addDummy(w, r, link)
+		addDummy(w, r, linkAdd)
 	// Bail out
 	default:
 		err := errors.New("Link type not implemented")
@@ -64,10 +64,10 @@ func Add(w http.ResponseWriter, r *http.Request) {
 }
 
 // addBridge creates a basic linux bridge
-func addBridge(w http.ResponseWriter, r *http.Request, link linkAdd) {
+func addBridge(w http.ResponseWriter, r *http.Request, linkAdd linkAdd) {
 	// Setup link attributes
 	linkAttrs := netlink.NewLinkAttrs()
-	linkAttrs.Name = link.Name
+	linkAttrs.Name = linkAdd.Link
 
 	// Setup the netlink.Bridge struct
 	bridge := &netlink.Bridge{
@@ -83,15 +83,23 @@ func addBridge(w http.ResponseWriter, r *http.Request, link linkAdd) {
 		return
 	}
 
+	refreshedLink, err := netlink.LinkByName(bridge.Name)
+	if err != nil {
+		msg := fmt.Sprintf("Error looking up link %s", bridge.Name)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+		return
+	}
 	msg := fmt.Sprintf("Successfully added bridge %s", bridge.Name)
-	utilsv1.ReplySuccess(w, r, msg, bridge)
+	utilsv1.ReplySuccess(w, r, msg, refreshedLink)
+	return
 }
 
 // addDummy creates a dummy device
-func addDummy(w http.ResponseWriter, r *http.Request, link linkAdd) {
+func addDummy(w http.ResponseWriter, r *http.Request, linkAdd linkAdd) {
 	// Setup link attributes
 	linkAttrs := netlink.NewLinkAttrs()
-	linkAttrs.Name = link.Name
+	linkAttrs.Name = linkAdd.Link
 
 	// Setup the netlink.Dummy struct
 	dummy := &netlink.Dummy{
@@ -107,6 +115,15 @@ func addDummy(w http.ResponseWriter, r *http.Request, link linkAdd) {
 		return
 	}
 
+	// Lookup the link by name
+	refreshedLink, err := netlink.LinkByName(dummy.Name)
+	if err != nil {
+		msg := fmt.Sprintf("Error looking up link %s", dummy.Name)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+		return
+	}
 	msg := fmt.Sprintf("Successfully added dummy %s", dummy.Name)
-	utilsv1.ReplySuccess(w, r, msg, dummy)
+	utilsv1.ReplySuccess(w, r, msg, refreshedLink)
+	return
 }

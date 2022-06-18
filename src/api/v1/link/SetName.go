@@ -62,7 +62,13 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		refreshedLink, _ := netlink.LinkByName(setName.Name)
+		refreshedLink, err := netlink.LinkByName(setName.Name)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setName.Name)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
 		// Prep response
 		msg := fmt.Sprintf("Successfully renamed %s to %s", setName.Link, setName.Name)

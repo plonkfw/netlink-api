@@ -12,7 +12,7 @@ import (
 )
 
 type setNoMaster struct {
-	Name string
+	Link string
 }
 
 // SetNoMaster removes the master of the link device
@@ -43,10 +43,10 @@ func SetNoMaster(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if setNoMaster.Name != "" {
-		link, _ := netlink.LinkByName(setNoMaster.Name)
+	if setNoMaster.Link != "" {
+		link, err := netlink.LinkByName(setNoMaster.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setNoMaster.Name)
+			msg := fmt.Sprintf("Error looking up link %s", setNoMaster.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
@@ -55,21 +55,27 @@ func SetNoMaster(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkSetNoMaster(link)
 		if err != nil {
-			msg := fmt.Sprintf("Error removing master of link %s", setNoMaster.Name)
+			msg := fmt.Sprintf("Error removing master of link %s", setNoMaster.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
 		// Lookup the link by name
-		refreshedLink, _ := netlink.LinkByName(setNoMaster.Name)
+		refreshedLink, err := netlink.LinkByName(setNoMaster.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setNoMaster.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully removed the master of %s", setNoMaster.Name)
+		msg := fmt.Sprintf("Successfully removed the master of %s", setNoMaster.Link)
 		utilsv1.ReplySuccess(w, r, msg, refreshedLink)
 		return
 	}
-	msg := fmt.Sprintf("Invalid paramaters %s", setNoMaster.Name)
+	msg := fmt.Sprintf("Invalid paramaters %s", setNoMaster.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return

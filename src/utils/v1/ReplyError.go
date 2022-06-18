@@ -52,7 +52,13 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, code string,
 		Message: message,
 		Data:    err.Error(),
 	}
-	jsonResponse, _ := json.Marshal(response)
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		msg := "Error marshaling response"
+		Log.Error().Err(err).Msg(msg)
+		ReplyError(w, r, msg, "EPACKFAIL", err)
+		return
+	}
 
 	// send the response
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

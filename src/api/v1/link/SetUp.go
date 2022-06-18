@@ -12,7 +12,7 @@ import (
 )
 
 type setUp struct {
-	Name string
+	Link string
 }
 
 // SetUp enables link devices
@@ -43,10 +43,10 @@ func SetUp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if setUp.Name != "" {
-		link, err := netlink.LinkByName(setUp.Name)
+	if setUp.Link != "" {
+		link, err := netlink.LinkByName(setUp.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setUp.Name)
+			msg := fmt.Sprintf("Error looking up link %s", setUp.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
@@ -55,21 +55,27 @@ func SetUp(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkSetUp(link)
 		if err != nil {
-			msg := fmt.Sprintf("Error bringing up link %s", setUp.Name)
+			msg := fmt.Sprintf("Error bringing up link %s", setUp.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
 		// Lookup the link by name
-		refreshedLink, _ := netlink.LinkByName(setUp.Name)
+		refreshedLink, err := netlink.LinkByName(setUp.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setUp.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully brought up interface %s", setUp.Name)
+		msg := fmt.Sprintf("Successfully brought up interface %s", setUp.Link)
 		utilsv1.ReplySuccess(w, r, msg, refreshedLink)
 		return
 	}
-	msg := fmt.Sprintf("Invalid paramaters %s", setUp.Name)
+	msg := fmt.Sprintf("Invalid paramaters %s", setUp.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return

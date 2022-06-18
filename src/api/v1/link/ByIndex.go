@@ -11,9 +11,15 @@ import (
 
 // ByIndex retrieves a link by index
 func ByIndex(w http.ResponseWriter, r *http.Request) {
-	// Get the Index of the link from query params - /v1/link/by-name?name=lo
+	// Get the Index of the link from query params - /v1/link/by-index?index=1
 	query := r.URL.Query().Get("index")
-	index, _ := strconv.Atoi(query)
+	index, err := strconv.Atoi(query)
+	if err != nil {
+		msg := fmt.Sprintf("Error parsing param %s", query)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
+		return
+	}
 
 	// Lookup the link by Index
 	link, err := netlink.LinkByIndex(index)

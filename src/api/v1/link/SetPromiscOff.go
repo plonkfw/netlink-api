@@ -61,7 +61,13 @@ func SetPromiscOff(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		refreshedLink, _ := netlink.LinkByName(setPromiscOff.Link)
+		refreshedLink, err := netlink.LinkByName(setPromiscOff.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setPromiscOff.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
 		// Prep response
 		msg := fmt.Sprintf("Successfully disabled promiscuous on link %s", setPromiscOff.Link)

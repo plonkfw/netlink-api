@@ -12,7 +12,7 @@ import (
 )
 
 type setDown struct {
-	Name string
+	Link string
 }
 
 // SetDown disables link devices
@@ -43,10 +43,10 @@ func SetDown(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if setDown.Name != "" {
-		link, err := netlink.LinkByName(setDown.Name)
+	if setDown.Link != "" {
+		link, err := netlink.LinkByName(setDown.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setDown.Name)
+			msg := fmt.Sprintf("Error looking up link %s", setDown.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
@@ -55,26 +55,26 @@ func SetDown(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkSetDown(link)
 		if err != nil {
-			msg := fmt.Sprintf("Error downing link %s", setDown.Name)
+			msg := fmt.Sprintf("Error downing link %s", setDown.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
-		refreshedLink, err := netlink.LinkByName(setDown.Name)
+		refreshedLink, err := netlink.LinkByName(setDown.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error refreshing info for link %s", setDown.Name)
+			msg := fmt.Sprintf("Error refreshing info for link %s", setDown.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
 		}
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully downed interface %s", setDown.Name)
+		msg := fmt.Sprintf("Successfully downed interface %s", setDown.Link)
 		utilsv1.ReplySuccess(w, r, msg, refreshedLink)
 		return
 	}
-	msg := fmt.Sprintf("Invalid paramaters %s", setDown.Name)
+	msg := fmt.Sprintf("Invalid paramaters %s", setDown.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 }

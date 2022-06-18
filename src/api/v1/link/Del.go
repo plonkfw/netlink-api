@@ -12,7 +12,7 @@ import (
 )
 
 type linkDel struct {
-	Name string
+	Link string
 }
 
 // Del removes link devices
@@ -43,10 +43,10 @@ func Del(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if linkDel.Name != "" {
-		link, err := netlink.LinkByName(linkDel.Name)
+	if linkDel.Link != "" {
+		link, err := netlink.LinkByName(linkDel.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", linkDel.Name)
+			msg := fmt.Sprintf("Error looking up link %s", linkDel.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
@@ -55,14 +55,14 @@ func Del(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkDel(link)
 		if err != nil {
-			msg := fmt.Sprintf("Error removing link %s", linkDel.Name)
+			msg := fmt.Sprintf("Error removing link %s", linkDel.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully removed link %s", linkDel.Name)
+		msg := fmt.Sprintf("Successfully removed link %s", linkDel.Link)
 		utilsv1.ReplySuccess(w, r, msg, nil)
 		return
 	}

@@ -18,7 +18,13 @@ func ReplySuccess(w http.ResponseWriter, r *http.Request, msg string, data inter
 	}
 
 	// JSON-ify the response
-	jsonResponse, _ := json.Marshal(response)
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		msg := "Error marshaling response"
+		Log.Error().Err(err).Msg(msg)
+		ReplyError(w, r, msg, "EPACKFAIL", err)
+		return
+	}
 
 	// Send the response
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")

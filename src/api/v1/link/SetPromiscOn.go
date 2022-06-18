@@ -61,7 +61,13 @@ func SetPromiscOn(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		refreshedLink, _ := netlink.LinkByName(setPromiscOn.Link)
+		refreshedLink, err := netlink.LinkByName(setPromiscOn.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setPromiscOn.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
 		// Prep response
 		msg := fmt.Sprintf("Successfully enabled promiscuous on link %s", setPromiscOn.Link)

@@ -12,7 +12,7 @@ import (
 )
 
 type setMasterByIndex struct {
-	Name        string
+	Link        string
 	MasterIndex int
 }
 
@@ -51,7 +51,7 @@ func SetMasterByIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If they supplied an interface name
-	if setMasterByIndex.MasterIndex != 0 && setMasterByIndex.Name != "" {
+	if setMasterByIndex.MasterIndex != 0 && setMasterByIndex.Link != "" {
 		// Look up the master link
 		newMaster, err := netlink.LinkByIndex(setMasterByIndex.MasterIndex)
 		if err != nil {
@@ -62,9 +62,9 @@ func SetMasterByIndex(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Look up the child link
-		newLink, err := netlink.LinkByName(setMasterByIndex.Name)
+		newLink, err := netlink.LinkByName(setMasterByIndex.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setMasterByIndex.Name)
+			msg := fmt.Sprintf("Error looking up link %s", setMasterByIndex.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
@@ -74,28 +74,41 @@ func SetMasterByIndex(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkSetMaster(newLink, newMaster)
 		if err != nil {
-			msg := fmt.Sprintf("Error binding link %s to master %d", setMasterByIndex.Name, setMasterByIndex.MasterIndex)
+			msg := fmt.Sprintf("Error binding link %s to master %d", setMasterByIndex.Link, setMasterByIndex.MasterIndex)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
-		// Lookup the link by name
-		refreshedLink, _ := netlink.LinkByName(setMasterByIndex.Name)
-		refreshedMaster, _ := netlink.LinkByIndex(setMasterByIndex.MasterIndex)
+		// Refresh link information
+		refreshedLink, err := netlink.LinkByName(setMasterByIndex.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setMasterByIndex.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
+		err = nil
+		refreshedMaster, err := netlink.LinkByIndex(setMasterByIndex.MasterIndex)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %d", setMasterByIndex.MasterIndex)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Prep response
 		var responseData responseDataSetMasterByIndex
-
 		responseData.Link = refreshedLink
 		responseData.Master = refreshedMaster
 
-		// Prep response
-		msg := fmt.Sprintf("Successfully bound %s to master %d", setMasterByIndex.Name, setMasterByIndex.MasterIndex)
+		msg := fmt.Sprintf("Successfully bound %s to master %d", setMasterByIndex.Link, setMasterByIndex.MasterIndex)
 		utilsv1.ReplySuccess(w, r, msg, responseData)
 		return
 	}
 
-	msg := fmt.Sprintf("Invalid paramaters %s %d", setMasterByIndex.Name, setMasterByIndex.MasterIndex)
+	msg := fmt.Sprintf("Invalid paramaters %s %d", setMasterByIndex.Link, setMasterByIndex.MasterIndex)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return

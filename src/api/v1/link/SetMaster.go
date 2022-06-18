@@ -12,7 +12,7 @@ import (
 )
 
 type setMaster struct {
-	Name   string
+	Link   string
 	Master string
 }
 
@@ -51,7 +51,7 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If they supplied an interface name
-	if setMaster.Master != "" && setMaster.Name != "" {
+	if setMaster.Master != "" && setMaster.Link != "" {
 		// Look up the master link
 		newMaster, err := netlink.LinkByName(setMaster.Master)
 		if err != nil {
@@ -62,9 +62,9 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Look up the child link
-		newLink, err := netlink.LinkByName(setMaster.Name)
+		newLink, err := netlink.LinkByName(setMaster.Link)
 		if err != nil {
-			msg := fmt.Sprintf("Error looking up link %s", setMaster.Name)
+			msg := fmt.Sprintf("Error looking up link %s", setMaster.Link)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
 			return
@@ -74,15 +74,29 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		err = nil
 		err = netlink.LinkSetMaster(newLink, newMaster)
 		if err != nil {
-			msg := fmt.Sprintf("Error binding link %s to master %s", setMaster.Name, setMaster.Master)
+			msg := fmt.Sprintf("Error binding link %s to master %s", setMaster.Link, setMaster.Master)
 			utilsv1.Log.Error().Err(err).Msg(msg)
 			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
 			return
 		}
 
 		// Lookup the link by name
-		refreshedLink, _ := netlink.LinkByName(setMaster.Name)
-		refreshedMaster, _ := netlink.LinkByName(setMaster.Master)
+		refreshedLink, err := netlink.LinkByName(setMaster.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setMaster.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		err = nil
+		refreshedMaster, err := netlink.LinkByName(setMaster.Master)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", setMaster.Master)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
 
 		var responseData responseDataSetMaster
 
@@ -90,12 +104,12 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		responseData.Master = refreshedMaster
 
 		// Prep response
-		msg := fmt.Sprintf("Successfully bound %s to master %s", setMaster.Name, setMaster.Master)
+		msg := fmt.Sprintf("Successfully bound %s to master %s", setMaster.Link, setMaster.Master)
 		utilsv1.ReplySuccess(w, r, msg, responseData)
 		return
 	}
 
-	msg := fmt.Sprintf("Invalid paramaters %s %s", setMaster.Name, setMaster.Master)
+	msg := fmt.Sprintf("Invalid paramaters %s %s", setMaster.Link, setMaster.Master)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return

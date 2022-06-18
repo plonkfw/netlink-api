@@ -77,7 +77,14 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	addressList, _ := netlink.AddrList(link, 0)
+	// Get address info
+	addressList, err := netlink.AddrList(link, 0)
+	if err != nil {
+		msg := fmt.Sprintf("Error refreshing info for link %s", addr.Link)
+		utilsv1.Log.Error().Err(err).Msg(msg)
+		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+		return
+	}
 
 	// Prep response
 	msg := fmt.Sprintf("Successfully added address %s to link %s", addr.Address, addr.Link)
