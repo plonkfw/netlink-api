@@ -2,6 +2,7 @@ package addrv1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -46,47 +47,58 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Lookup the link devices by name
-	link, err := netlink.LinkByName(addrAdd.Link)
-	if err != nil {
-		msg := fmt.Sprintf("Error looking up link %s", addrAdd.Link)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
-		return
+	// Did they supply the paramas?
+	if addrAdd.Link != "" && addrAdd.Address != "" {
+
+		// Lookup the link devices by name
+		link, err := netlink.LinkByName(addrAdd.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error looking up link %s", addrAdd.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Parse the given address
+		parsedAddress, err := netlink.ParseAddr(addrAdd.Address)
+		if err != nil {
+			msg := fmt.Sprintf("Error parsing address %s", addrAdd.Address)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
+			return
+		}
+
+		// Reset err to nil...
+		err = nil
+		// Attempt to create the link device
+		err = netlink.AddrAdd(link, parsedAddress)
+
+		// If it fails send our error response
+		if err != nil {
+			msg := fmt.Sprintf("Error adding address %s to link %s", addrAdd.Address, addrAdd.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
+			return
+		}
+
+		// Get address info
+		addressList, err := netlink.AddrList(link, 0)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", addrAdd.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Prep response
+		msg := fmt.Sprintf("Successfully added address %s to link %s", addrAdd.Address, addrAdd.Link)
+		utilsv1.ReplySuccess(w, r, msg, addressList)
 	}
 
-	// Parse the given address
-	parsedAddress, err := netlink.ParseAddr(addrAdd.Address)
-	if err != nil {
-		msg := fmt.Sprintf("Error parsing address %s", addrAdd.Address)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
-		return
-	}
-
-	// Reset err to nil...
-	err = nil
-	// Attempt to create the link device
-	err = netlink.AddrAdd(link, parsedAddress)
-
-	// If it fails send our error response
-	if err != nil {
-		msg := fmt.Sprintf("Error adding address %s to link %s", addrAdd.Address, addrAdd.Link)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
-		return
-	}
-
-	// Get address info
-	addressList, err := netlink.AddrList(link, 0)
-	if err != nil {
-		msg := fmt.Sprintf("Error refreshing info for link %s", addrAdd.Link)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
-		return
-	}
-
-	// Prep response
-	msg := fmt.Sprintf("Successfully added address %s to link %s", addrAdd.Address, addrAdd.Link)
-	utilsv1.ReplySuccess(w, r, msg, addressList)
+	// Invalid params
+	msg := fmt.Sprintf("Invalid paramaters %s %s", addrAdd.Link, addrAdd.Address)
+	err = errors.New(msg)
+	utilsv1.Log.Error().Err(err).Msg(msg)
+	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
+	return
 }

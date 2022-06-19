@@ -19,16 +19,11 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, code string,
 		message = msg
 	}
 
-	if code == "" {
-		code = "EEUNKNOWN"
-	}
-
 	errHeader := http.StatusBadRequest
 
 	// Select proper error code based on message
 	switch code {
 	case "EEXISTS":
-		// We set the http status header up here
 		errHeader = http.StatusConflict
 		break
 
@@ -42,6 +37,8 @@ func ReplyError(w http.ResponseWriter, r *http.Request, msg string, code string,
 
 	default:
 		// If no error message is supplied, fall back to EEUNKNOWN
+		code = "EEUNKNOWN"
+		errHeader = http.StatusBadRequest
 		break
 	}
 

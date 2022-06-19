@@ -43,6 +43,7 @@ func SetPromiscOff(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Did they provide a link name
 	if setPromiscOff.Link != "" {
 		link, err := netlink.LinkByName(setPromiscOff.Link)
 		if err != nil {
@@ -75,6 +76,7 @@ func SetPromiscOff(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Invalid params
 	msg := fmt.Sprintf("Invalid paramaters %s", setPromiscOff.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAMS", err)

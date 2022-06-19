@@ -2,6 +2,7 @@ package linkv1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -43,6 +44,7 @@ func Del(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Did they provide a link name?
 	if linkDel.Link != "" {
 		link, err := netlink.LinkByName(linkDel.Link)
 		if err != nil {
@@ -66,4 +68,11 @@ func Del(w http.ResponseWriter, r *http.Request) {
 		utilsv1.ReplySuccess(w, r, msg, nil)
 		return
 	}
+
+	// Invalid params
+	msg := fmt.Sprintf("Invalid paramaters %s", linkDel.Link)
+	err = errors.New(msg)
+	utilsv1.Log.Error().Err(err).Msg(msg)
+	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
+	return
 }

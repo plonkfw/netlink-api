@@ -2,6 +2,7 @@ package linkv1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -109,7 +110,9 @@ func SetMaster(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Invalid params
 	msg := fmt.Sprintf("Invalid paramaters %s %s", setMaster.Link, setMaster.Master)
+	err = errors.New(msg)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return

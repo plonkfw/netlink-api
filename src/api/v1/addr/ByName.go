@@ -1,6 +1,7 @@
 package addrv1
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -13,25 +14,34 @@ func ByName(w http.ResponseWriter, r *http.Request) {
 	// Get the name of the link from query params - /v1/addr/by/name?name=br0
 	name := r.URL.Query().Get("name")
 
-	// Lookup the link by name
-	link, err := netlink.LinkByName(name)
-	if err != nil {
-		msg := fmt.Sprintf("Error querying link %s", name)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
-		return
+	if name != "" {
+		// Lookup the link by name
+		link, err := netlink.LinkByName(name)
+		if err != nil {
+			msg := fmt.Sprintf("Error querying link %s", name)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Get address info
+		addressList, err := netlink.AddrList(link, 0)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", name)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Prep response
+		msg := fmt.Sprintf("Found addresses on link %s", name)
+		utilsv1.ReplySuccess(w, r, msg, addressList)
 	}
 
-	// Get address info
-	addressList, err := netlink.AddrList(link, 0)
-	if err != nil {
-		msg := fmt.Sprintf("Error refreshing info for link %s", name)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
-		return
-	}
-
-	// Prep response
-	msg := fmt.Sprintf("Found addresses on link %s", name)
-	utilsv1.ReplySuccess(w, r, msg, addressList)
+	// Invalid params
+	msg := fmt.Sprintf("Invalid paramaters %s", name)
+	err := errors.New(msg)
+	utilsv1.Log.Error().Err(err).Msg(msg)
+	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
+	return
 }

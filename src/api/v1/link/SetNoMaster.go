@@ -43,6 +43,7 @@ func SetNoMaster(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Did they provide params
 	if setNoMaster.Link != "" {
 		link, err := netlink.LinkByName(setNoMaster.Link)
 		if err != nil {
@@ -75,6 +76,8 @@ func SetNoMaster(w http.ResponseWriter, r *http.Request) {
 		utilsv1.ReplySuccess(w, r, msg, refreshedLink)
 		return
 	}
+
+	// Invalid params
 	msg := fmt.Sprintf("Invalid paramaters %s", setNoMaster.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)

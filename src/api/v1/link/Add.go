@@ -16,7 +16,6 @@ import (
 type linkAdd struct {
 	Link string
 	Type string
-	MTU  int
 }
 
 // Add creates a new network link - equivalent to `ip link add $i`
@@ -48,19 +47,26 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Call the appropriate function
-	switch linkAdd.Type {
-	// Basic bridge
-	case "bridge":
-		addBridge(w, r, linkAdd)
-	// Dummy device
-	case "dummy":
-		addDummy(w, r, linkAdd)
-	// Bail out
-	default:
-		err := errors.New("Link type not implemented")
-		utilsv1.ReplyError(w, r, "ENOTIMPLEMENTED", "Link type not implemented", err)
+	if linkAdd.Type != "" && linkAdd.Link != "" {
+		// Call the appropriate function
+		switch linkAdd.Type {
+		// Basic bridge
+		case "bridge":
+			addBridge(w, r, linkAdd)
+		// Dummy device
+		case "dummy":
+			addDummy(w, r, linkAdd)
+		// Bail out
+		default:
+			msg := "Link type not implemented"
+			err := errors.New(msg)
+			utilsv1.ReplyError(w, r, "ENOTIMPLEMENTED", msg, err)
+		}
 	}
+
+	msg := fmt.Sprintf("Invalid paramaters %s %s", linkAdd.Link, linkAdd.Type)
+	err = errors.New(msg)
+	utilsv1.ReplyError(w, r, "ENOTIMPLEMENTED", msg, err)
 }
 
 // addBridge creates a basic linux bridge

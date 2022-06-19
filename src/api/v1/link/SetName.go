@@ -44,6 +44,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Did they provide params
 	if setName.Name != "" && setName.Link != "" {
 		link, err := netlink.LinkByName(setName.Link)
 		if err != nil {
@@ -76,6 +77,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Invalid params
 	msg := fmt.Sprintf("Invalid paramaters %s %s", setName.Link, setName.Name)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAMS", err)

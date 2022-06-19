@@ -43,6 +43,7 @@ func SetDown(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Did they provide a link name
 	if setDown.Link != "" {
 		link, err := netlink.LinkByName(setDown.Link)
 		if err != nil {
@@ -74,7 +75,9 @@ func SetDown(w http.ResponseWriter, r *http.Request) {
 		utilsv1.ReplySuccess(w, r, msg, refreshedLink)
 		return
 	}
-	msg := fmt.Sprintf("Invalid paramaters %s", setDown.Link)
+
+	// Invalid params
+	msg := fmt.Sprintf("Invalid paramater %s", setDown.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 }

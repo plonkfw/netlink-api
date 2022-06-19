@@ -2,6 +2,7 @@ package addrv1
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -46,47 +47,57 @@ func Del(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Lookup the link devices by name
-	link, err := netlink.LinkByName(addrDel.Link)
-	if err != nil {
-		msg := fmt.Sprintf("Error looking up link %s", addrDel.Link)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
-		return
+	if addrDel.Link != "" && addrDel.Address != "" {
+		// Lookup the link devices by name
+		link, err := netlink.LinkByName(addrDel.Link)
+		if err != nil {
+			msg := fmt.Sprintf("Error looking up link %s", addrDel.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Parse the given address
+		parsedAddress, err := netlink.ParseAddr(addrDel.Address)
+		if err != nil {
+			msg := fmt.Sprintf("Error parsing address %s", addrDel.Address)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
+			return
+		}
+
+		// Reset err to nil...
+		err = nil
+		// Attempt to create the link device
+		err = netlink.AddrDel(link, parsedAddress)
+
+		// If it fails send our error response
+		if err != nil {
+			msg := fmt.Sprintf("Error removing address %s from link %s", addrDel.Address, addrDel.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
+			return
+		}
+
+		// Get address info
+		addressList, err := netlink.AddrList(link, 0)
+		if err != nil {
+			msg := fmt.Sprintf("Error refreshing info for link %s", addrDel.Link)
+			utilsv1.Log.Error().Err(err).Msg(msg)
+			utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
+			return
+		}
+
+		// Prep response
+		msg := fmt.Sprintf("Successfully removed address %s from link %s", addrDel.Address, addrDel.Link)
+		utilsv1.ReplySuccess(w, r, msg, addressList)
 	}
 
-	// Parse the given address
-	parsedAddress, err := netlink.ParseAddr(addrDel.Address)
-	if err != nil {
-		msg := fmt.Sprintf("Error parsing address %s", addrDel.Address)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "EPARSEFAIL", err)
-		return
-	}
+	// Invalid params
+	msg := fmt.Sprintf("Invalid paramaters %s %s", addrDel.Address, addrDel.Link)
+	err = errors.New(msg)
+	utilsv1.Log.Error().Err(err).Msg(msg)
+	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
+	return
 
-	// Reset err to nil...
-	err = nil
-	// Attempt to create the link device
-	err = netlink.AddrDel(link, parsedAddress)
-
-	// If it fails send our error response
-	if err != nil {
-		msg := fmt.Sprintf("Error removing address %s from link %s", addrDel.Address, addrDel.Link)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "EACTIONFAIL", err)
-		return
-	}
-
-	// Get address info
-	addressList, err := netlink.AddrList(link, 0)
-	if err != nil {
-		msg := fmt.Sprintf("Error refreshing info for link %s", addrDel.Link)
-		utilsv1.Log.Error().Err(err).Msg(msg)
-		utilsv1.ReplyError(w, r, msg, "ELOOKUPFAIL", err)
-		return
-	}
-
-	// Prep response
-	msg := fmt.Sprintf("Successfully removed address %s from link %s", addrDel.Address, addrDel.Link)
-	utilsv1.ReplySuccess(w, r, msg, addressList)
 }
