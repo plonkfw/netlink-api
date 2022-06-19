@@ -91,6 +91,7 @@ func Del(w http.ResponseWriter, r *http.Request) {
 		// Prep response
 		msg := fmt.Sprintf("Successfully removed address %s from link %s", addrDel.Address, addrDel.Link)
 		utilsv1.ReplySuccess(w, r, msg, addressList)
+		return
 	}
 
 	// Invalid params
@@ -99,5 +100,4 @@ func Del(w http.ResponseWriter, r *http.Request) {
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
 	return
-
 }

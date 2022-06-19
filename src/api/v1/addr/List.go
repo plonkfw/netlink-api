@@ -19,4 +19,5 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 	msg := "Found addresses"
 	utilsv1.ReplySuccess(w, r, msg, addresses)
+	return
 }

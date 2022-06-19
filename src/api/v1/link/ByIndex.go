@@ -38,6 +38,7 @@ func ByIndex(w http.ResponseWriter, r *http.Request) {
 		// Prep response
 		msg := fmt.Sprintf("Found interface %d", index)
 		utilsv1.ReplySuccess(w, r, msg, link)
+		return
 	}
 
 	// Invalid params

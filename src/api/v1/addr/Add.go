@@ -93,6 +93,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		// Prep response
 		msg := fmt.Sprintf("Successfully added address %s to link %s", addrAdd.Address, addrAdd.Link)
 		utilsv1.ReplySuccess(w, r, msg, addressList)
+		return
 	}
 
 	// Invalid params

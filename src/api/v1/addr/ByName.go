@@ -36,6 +36,7 @@ func ByName(w http.ResponseWriter, r *http.Request) {
 		// Prep response
 		msg := fmt.Sprintf("Found addresses on link %s", name)
 		utilsv1.ReplySuccess(w, r, msg, addressList)
+		return
 	}
 
 	// Invalid params

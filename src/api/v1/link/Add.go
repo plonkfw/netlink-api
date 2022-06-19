@@ -62,6 +62,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 			err := errors.New(msg)
 			utilsv1.ReplyError(w, r, "ENOTIMPLEMENTED", msg, err)
 		}
+		return
 	}
 
 	msg := fmt.Sprintf("Invalid paramaters %s %s", linkAdd.Link, linkAdd.Type)

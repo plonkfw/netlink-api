@@ -20,4 +20,5 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 	msg := fmt.Sprintf("Found interfaces")
 	utilsv1.ReplySuccess(w, r, msg, links)
+	return
 }

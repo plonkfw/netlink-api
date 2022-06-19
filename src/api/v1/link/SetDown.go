@@ -80,4 +80,5 @@ func SetDown(w http.ResponseWriter, r *http.Request) {
 	msg := fmt.Sprintf("Invalid paramater %s", setDown.Link)
 	utilsv1.Log.Error().Err(err).Msg(msg)
 	utilsv1.ReplyError(w, r, msg, "EINVALIDPARAM", err)
+	return
 }
