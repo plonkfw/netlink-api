@@ -10,9 +10,8 @@ It's the library used by docker and similar projects.
 
 ## How do I use this ?
 
-For now, run `./build-and-run.sh` (as a sudoer if you want to create/modify interfaces)
-
-In the future this will be a containerized blob that will need to run with the `NET_ADMIN` cap or something.
+For development purposes, run `./build-and-run.sh` (as a sudoer if you want to create/modify interfaces)
+For testing, run `docker compose build && docker compose up`
 
 ## Is this safe to start using now?
 
